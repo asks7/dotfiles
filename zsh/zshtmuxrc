@@ -1,0 +1,179 @@
+if [ -n "${TMUX}" ]
+then
+	echo -e "\e[1;42mLoad zshtmuxrc\e[m"
+	# send key
+	function send () {
+		case "$1" in
+			"-a" )
+				[ -z "$1" -o -z "$2" ] && return 1
+				declare -i num=`tmux list-panes | wc -l` && num=$num-1
+				for x in $(seq 0 $num)
+				do
+					tmux send-keys -t $x "$2 $3 $4 $5" C-m
+				done
+				unset num
+				return 0
+			;;
+			"-l" )
+				declare -i num=`tmux list-panes | wc -l` && num=$num-1
+				for x in $(seq 0 $num)
+				do
+					tmux send-keys -t $x "exec zsh --login -i" C-m
+				done
+				unset num
+				return 0
+			;;
+			"-r" )
+				declare -i num=`tmux list-panes | wc -l`
+				case $num in
+					1 )
+						source $HOME/.zshrc
+						unset num
+						return 0
+					;;
+					[2-4] )
+						tmux kill-pane -a
+						tmux display-message "Reload zsh"
+						source $HOME/.zshrc
+						pane $num
+						unset num
+						return 0
+					;;
+					* )
+						return 1
+					;;
+				esac
+				return 127
+			;;
+			[0-9] )
+				[ -z "$1" -o -z "$2" ] && return 1
+				tmux send-keys -t $1 "$2 $3 $4 $5" C-m
+				return 0
+			;;
+			*)
+				echo -e "Usage: send [OPTION|NUM]... COMMAND\n\nOPTION:"
+				echo -e "  -a\tsend command all panels"
+				echo -e "  -l\trelogin zsh (exec zsh --login -i)"
+				echo -e "  -r\treload zsh config file (\$HOME/.zshrc)\n"
+				echo -e "COMMAND:"
+				echo -e "  reload\tall reload panel (\$HOME/.zshrc)"
+				return 0
+			;;
+		esac
+		return 127
+	}
+	# split panels.
+	function pane () {
+		case "$1" in
+			3 )
+				[ "$2" = "new" ] && {
+					tmux new-window && sleep 0.7
+					tmux splitw -v -h && sleep 0.7
+					tmux splitw -v -t 1 && sleep 0.7
+					tmux command-prompt "rename-window"
+					return 0
+				} || {
+					[ `tmux list-panes | wc -l` -ne 1 ] && return 1
+					tmux splitw -v -h && sleep 0.7
+					tmux splitw -v -t 1
+					return 0
+				}
+				return 127
+			;;
+			4 )
+				if [ "$2" = "new" ]
+				then
+					tmux new-window $3 && sleep 0.7
+					tmux splitw -v && sleep 0.7
+					tmux splitw -v -t 0 -h && sleep 0.7
+					tmux splitw -v -t 1 -h && sleep 0.7
+					tmux splitw -v -t 1 -h
+					tmux command-prompt "rename-window %%"
+					return 0
+				else
+					[ ` tmux list-panes | wc -l` -ne 1 ] && return 1
+					tmux splitw -v && sleep 0.7
+					tmux splitw -v -t 0 -h && sleep 0.7
+					tmux splitw -v -t 1 -h
+					return 0
+				fi
+				return 127
+			;;
+			* )
+				echo -e "Usage: pane [NUM]... COMMAND\n\nNUM:"
+				echo -e "  3\t3 split panel [|-]"
+				echo -e "  4\t4 split panel [＋]\n"
+				echo -e "COMMAND:"
+				echo -e "  new\tcreate new window, auto split panels (pane [NUM] new [NAME])\n"
+				return 0
+			;;
+		esac
+		return 127
+	}
+	# killed all panels.
+	function panek () {
+		if [ `tmux list-panes | wc -l` -ge 1 ]
+		then
+			tmux select-pane -t 0
+			tmux kill-pane -a
+			clear
+			return 0
+		else
+			return 1
+		fi
+		return 127
+	}
+	# clear all panels,
+	function tclear () {
+		if [ `tmux list-panes | wc -l` -ne 1 ]
+		then
+			declare -i num=`tmux list-panes | wc -l` && num=$num-1
+			for x in $(seq 0 $num)
+			do
+				tmux send-keys -t $x "clear" C-m
+			done
+			unset num
+			return 0
+		else
+			return 1
+		fi
+		return 127
+	}
+	# move directory all panels,
+	function tcd () {
+		if [ "$1" = "." -o "$1" = "./" ]
+		then
+			declare -i num=`tmux list-panes | wc -l` && num=$num-1
+			for x in $(seq 0 $num)
+			do
+				tmux send-keys -t $x "cd $(pwd -P) && clear" C-m
+			done
+			unset num
+			return 0
+		else
+			declare -i num && num=`tmux list-panes | wc -l` && num=$num-1
+			for x in $(seq 0 $num)
+			do
+				tmux send-keys -t $x "cd $1 && clear" C-m
+			done
+			unset num
+			return 0
+		fi
+	}
+	
+	# copy buffer to clipboard
+	function tcopy () {
+		if [ -x $(which xsel) ]
+		then
+			SBUFFER=`tmux show-buffer`
+			echo -e "\e[1mCopy buffer: ${SBUFFER}\e[m"
+			echo -n "${SBUFFER}" | xsel -i --clipboard
+			return 0
+		fi
+		return 1
+	}
+	
+else
+	echo -e "\e[1;41mUnload zshtmuxrc\e[m"
+fi
+

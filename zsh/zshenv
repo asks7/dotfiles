@@ -1,0 +1,14 @@
+
+# wine
+if [[ -z ${TMUX} ]]
+then
+	#export PATH=/wine/1.6.2/bin:$PATH
+	
+	if [ -x /wine/bin/wine ]
+	then
+		export PATH=/wine/bin:$PATH
+	fi
+	
+	export PATH=$HOME/usr/bin:$PATH
+fi
+

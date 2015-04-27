@@ -1,0 +1,111 @@
+
+umask 022
+
+[ -f $HOME/.zshtmuxrc ] && source $HOME/.zshtmuxrc
+[ -f $HOME/git/z/z.sh ] && source $HOME/git/z/z.sh
+
+if [ `id -u` != 0 ]
+then
+	fpath=(~/git/zsh-completions $fpath)
+fi
+
+autoload -U colors
+colors
+
+autoload -U compinit
+compinit
+
+autoload -Uz vcs_info
+vcs_info
+
+if [ -n "${TMUX}" ]
+then
+PROMPT="
+%F{7}┌[%f%F{3}%B%n%b%f%F{7}]─[%f%F{6}%B%~%b%f%F{7}]─[%f%F{1}%B%?%b%f%F{7}]%f
+%F{7}└[$(tmux display -p '#P')]%F{7}─╼ %f"
+else
+PROMPT="
+%F{7}┌[%f%F{3}%B%n%b%f%F{7}]─[%f%F{6}%B%~%b%f%F{7}]─[%f%F{1}%B%?%b%f%F{7}]%f
+%F{7}└───╼ %f"
+fi
+
+RPROMPT="%1(v|%B%F{3}%1v%f%b|)"
+
+# zstyle
+zstyle ':completion:*' use-cache true
+zstyle ':completion:*:default' menu select=2
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+zstyle ':completion:*' list-separator '--'
+zstyle ':completion:*:manuals' separate-sections true
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+
+function precmd () {
+	psvar=()
+	LANG=en_US.UTF-8 vcs_info
+	[[ -n "$vcs_info_msg_0_" ]] && psvar[1]="$vcs_info_msg_0_"
+}
+
+setopt auto_param_slash
+setopt mark_dirs
+setopt list_types
+setopt auto_menu
+setopt auto_param_keys
+setopt interactive_comments
+setopt magic_equal_subst
+
+# alias
+alias ls='ls -F --color=auto'
+alias grep='grep --color=auto'
+
+alias l='ls'
+alias la='ls -a'
+alias ll='ls -l'
+
+alias pwdc='pwd | tr -d "\n" | xel -pi'
+
+alias aria2c='all_proxy="" aria2c'
+
+# functions
+function cdup () {
+	if [ -z "$BUFFER" ]; then
+		cd ..
+		if type precmd > /dev/null 2>&1; then
+			precmd
+		fi
+		local precmd_func
+		for precmd_func in $precmd_functions; do
+			$precmd_funo
+		done
+		zle reset-prompt
+	else
+		zle self-insert "^"
+	fi
+}
+
+zle -N cdup
+bindkey "\^" cdup
+
+function memclean () {
+	sudo -v
+	[ $? = 0 ] && {
+		free
+		sudo sync
+		sudo sysctl -w vm.drop_caches=3
+		echo
+		free
+		return 0
+	}
+	return 1
+}
+
+function nullproxy () {
+	if [ "${1}" != "" ]
+	then
+		ALL_PROXY="" NO_PROXY="" \
+		all_proxy="" no_proxy="" http_proxy="" https_proxy="" socks_proxy="" \
+		${@}
+		return $?
+	fi
+	return 1
+}
+
