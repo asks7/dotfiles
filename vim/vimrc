@@ -1,0 +1,61 @@
+" VIM - Vi IMproved 3.3.547
+
+set nocompatible
+
+syntax on
+
+set ruler number ttyfast modeline cursorline ignorecase
+set showcmd showmode
+set autoindent nobackup noswapfile
+set mouse=a
+set tabstop=3 laststatus=2
+set backspace=start,eol,indent
+
+if has('vim_starting')
+	set runtimepath+=/home/okarin/.vim/bundle/neobundle.vim
+endif
+
+call neobundle#rc(expand('$HOME/.vim/bundle'))
+
+" plugin
+NeoBundle 'git@github.com:Shougo/vimproc.vim.git'
+NeoBundle 'git@github.com:Shougo/vimshell.vim.git'
+NeoBundle 'git@github.com:Shougo/neocomplcache.vim.git'
+NeoBundle 'git@github.com:Shougo/vimproc.vim.git'
+NeoBundle 'git@github.com:Shougo/vimshell.vim.git'
+NeoBundle 'git@github.com:Shougo/unite.vim.git'
+NeoBundle 'git@github.com:scrooloose/nerdtree.git'
+NeoBundle 'git@github.com:itchyny/lightline.vim.git'
+" colorscheme
+NeoBundle 'git@github.com:tomasr/molokai.git'
+NeoBundle 'git@github.com:therubymug/vim-pyte.git'
+NeoBundle 'git@github.com:altercation/vim-colors-solarized.git'
+NeoBundle 'git@github.com:29decibel/codeschool-vim-theme.git'
+
+augroup myvimrc
+	autocmd!
+augroup END
+
+let $VIMRC=$HOME."/.vimrc"
+let $GVIMRC=$HOME."/.gvimrc"
+
+if has ('gui_running')
+	autocmd myvimrc BufWritePost $VIMRC nested source $VIMRC
+	autocmd myvimrc BufWritePost $GVIMRC source $GVIMRC
+else
+	colorscheme default
+	set background=dark
+	autocmd myvimrc BufWritePost $VIMRC nested source $VIMRC
+endif
+
+inoremap <expr><Tab> pumvisible() ? "\<C-n>" : "<Tab>"
+nnoremap <silent> zt :tabnew<CR>
+nnoremap <silent> .c :tabclose<CR>
+nnoremap <silent> .p :tabprevious<CR>
+nnoremap <silent> .n :tabnext<CR>
+
+let g:neocomplcache_enable_at_startup = 1
+let g:neocomplcache_max_list = 10
+
+filetype plugin on
+

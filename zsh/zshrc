@@ -9,6 +9,11 @@ then
 	fpath=(~/git/zsh-completions $fpath)
 fi
 
+if [ -x $HOME/Google/tools/apktool ]
+then
+	PATH=$HOME/Google/tools:$PATH
+fi
+
 autoload -U colors
 colors
 
@@ -84,19 +89,6 @@ function cdup () {
 
 zle -N cdup
 bindkey "\^" cdup
-
-function memclean () {
-	sudo -v
-	[ $? = 0 ] && {
-		free
-		sudo sync
-		sudo sysctl -w vm.drop_caches=3
-		echo
-		free
-		return 0
-	}
-	return 1
-}
 
 function nullproxy () {
 	if [ "${1}" != "" ]

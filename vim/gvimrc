@@ -1,0 +1,21 @@
+" VIM - Vi IMproved 7.3
+
+colorscheme solarized
+set background=light
+
+set lines=34
+set columns=110
+set nocursorline
+set autoindent
+
+set guifont=Ubuntu\ Mono\ 11
+set guioptions-=T
+set guioptions+=LlRrb
+set guioptions-=LlRrb
+
+"set t_Co=256
+
+nnoremap [unite] <Nop>
+nmap <Space>u [unite]
+nnoremap <silent> [unite]b :<C-u>Unite buffer<CR>
+
