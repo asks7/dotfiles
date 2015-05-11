@@ -1,0 +1,46 @@
+#User debian-tor
+Nickname torisproxy
+Address tor.is
+
+BandwidthRate 128 MBytes
+BandwidthBurst 256 MBytes
+MaxAdvertisedBandwidth 256 MBytes
+
+RelayBandwidthRate 256 KBytes
+RelayBandwidthBurst 512 KBytes
+
+# 9001
+ORPort 443
+ORListenAddress 127.0.0.1:9001
+
+# 9030
+DirPort 80
+DirListenAddress 127.0.0.1:9030
+
+SocksPort 9050
+SocksListenAddress 127.0.0.1
+SocksPolicy accept 127.0.0.1
+SocksPolicy reject *
+
+ControlPort 9051
+ControlListenAddress 127.0.0.1
+
+TransPort 9040
+TransListenAddress 192.168.1.254
+
+# 9053
+DNSPort 53
+DNSListenAddress 127.0.0.1:9053
+
+HiddenServiceDir /var/lib/tor/hiddenservice/
+HiddenServicePort 22 127.0.0.1:22
+HiddenServicePort 80 127.0.0.1:80
+
+ClientOnly 1
+#Bridge 127.0.0.1
+
+DisableDebuggerAttachment 0
+
+ExitPolicy accept *:6000-6009
+ExitPolicy reject *:*
+
